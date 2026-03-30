@@ -277,6 +277,15 @@
             color: white;
         }
 
+        #reset-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        #reset-btn:hover {
+            background: #5a6268;
+        }
+
         .status-message {
             text-align: center;
             margin-top: 15px;
@@ -504,6 +513,7 @@
 
     <div class="btn-group">
         <button id="start-btn">🚀 ចាប់ផ្តើម | Start</button>
+        <button id="reset-btn">🔄 បង្កើតថ្មី | Reset & Randomize</button>
     </div>
     <div id="status-message" class="status-message"></div>
     <div class="instruction-wrapper">
@@ -544,6 +554,7 @@
     const textDisplayDiv = document.getElementById("text-display");
     const inputField = document.getElementById("input-field");
     const startBtn = document.getElementById("start-btn");
+    const resetBtn = document.getElementById("reset-btn");
     const statusMsgDiv = document.getElementById("status-message");
     const randomStatsSpan = document.getElementById("random-stats");
     const modeBtns = document.querySelectorAll(".mode-btn");
@@ -608,12 +619,12 @@
     
     function initContent() {
         if (currentMode === "word") {
-            const wordsPerTest = typeof WORDS_PER_TEST !== 'undefined' ? WORDS_PER_TEST : 50;
+            const wordsPerTest = typeof WORDS_PER_TEST !== 'undefined' ? WORDS_PER_TEST : 100;
             wordsList = getRandomSubset(FULL_KHMER_WORDS, wordsPerTest);
             wordStatuses = new Array(wordsList.length).fill("pending");
             currentWordIndex = 0;
         } else {
-            const sentencesPerTest = typeof SENTENCES_PER_TEST !== 'undefined' ? SENTENCES_PER_TEST : 5;
+            const sentencesPerTest = typeof SENTENCES_PER_TEST !== 'undefined' ? SENTENCES_PER_TEST : 20;
             const randomSentences = getRandomSubset(FULL_KHMER_SENTENCES, sentencesPerTest);
             let fullText = randomSentences.join(" ");
             sentenceChars = fullText.split("");
@@ -965,17 +976,23 @@
         }
     }
     
+    // ============================================================
+    // FIXED START FUNCTION - Allows restart during active test
+    // ============================================================
     function startTest() {
+        // Stop any existing test completely
         if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
         }
         
+        // Reset all state variables for fresh start
         timeLeft = currentDuration;
         isActive = true;
         correctCount = 0;
         totalAttempted = 0;
         
+        // Reset progress based on current mode
         if (currentMode === "word") {
             wordStatuses = new Array(wordsList.length).fill("pending");
             currentWordIndex = 0;
@@ -984,18 +1001,71 @@
             currentCharIndex = 0;
         }
         
+        // Update displays
         updateTimerDisplay();
         wpmDisplay.innerText = "0";
         accuracyDisplay.innerText = "100";
+        
+        // Enable input and focus
         inputField.disabled = false;
         inputField.value = "";
         inputField.focus();
         
+        // Update status message
         statusMsgDiv.innerHTML = `⌨️ កំពុងធ្វើតេស្ត! វាយរួចចុច Shift + Space | Test in progress! Type then press Shift + Space`;
         
+        // Render the display
         render();
+        
+        // Start timer
         startTimer();
         updateStats();
+    }
+    
+    // ============================================================
+    // RESET FUNCTION - Randomizes content without starting test
+    // ============================================================
+    function resetAndRandomize() {
+        // Stop any ongoing test
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        
+        isActive = false;
+        
+        // Generate new random content based on current mode
+        initContent();
+        
+        // Reset time to current duration
+        timeLeft = currentDuration;
+        updateTimerDisplay();
+        
+        // Reset all stats
+        correctCount = 0;
+        totalAttempted = 0;
+        wpmDisplay.innerText = "0";
+        accuracyDisplay.innerText = "100";
+        
+        // Reset progress based on mode
+        if (currentMode === "word") {
+            wordStatuses = new Array(wordsList.length).fill("pending");
+            currentWordIndex = 0;
+        } else {
+            charStatuses = new Array(sentenceChars.length).fill("pending");
+            currentCharIndex = 0;
+        }
+        
+        // Render the new content
+        render();
+        
+        // Disable input until start
+        inputField.disabled = true;
+        inputField.value = "";
+        
+        // Update status message
+        let modeText = currentMode === "word" ? "ពាក្យ" : "ប្រយោគ";
+        statusMsgDiv.innerHTML = `🎲 បានបង្កើត ${modeText}ចៃដន្យថ្មី! ចុច Start ដើម្បីចាប់ផ្តើម | New random ${modeText} generated! Click Start to begin`;
     }
     
     // ============================================================
@@ -1063,6 +1133,7 @@
     // ============================================================
     
     startBtn.addEventListener("click", startTest);
+    resetBtn.addEventListener("click", resetAndRandomize);
     inputField.addEventListener("keydown", onKeyDown);
     
     modeBtns.forEach(btn => {
