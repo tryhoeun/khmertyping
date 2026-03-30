@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Khmer Typing Test - Word & Sentence Mode</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Khmer OS Battambang', 'Khmer OS Muol', 'Khmer OS', 'Noto Sans Khmer', system-ui, sans-serif;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 28px;
+            padding: 25px 30px;
+            max-width: 1300px;
+            width: 100%;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            text-align: center;
+            color: #1e4663;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #5f7f9e;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Mode Toggle */
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            background: #e0e7ef;
+            color: #2c5f8a;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            border: none;
+            font-size: 1.1rem;
+        }
+
+        .mode-btn.active {
+            background: #ff9800;
+            color: #2c2c2c;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+        }
+
+        /* Duration Selection */
+        .duration-selector {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .duration-btn {
+            background: white;
+            color: #2c5f8a;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            border: 2px solid #ddd;
+            font-size: 0.9rem;
+        }
+
+        .duration-btn.active {
+            background: #2c5f8a;
+            color: white;
+            border-color: #2c5f8a;
+        }
+
+        .duration-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            background: #f0f4f8;
+            padding: 12px 18px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            flex: 1;
+            text-align: center;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 12px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #5a6e7c;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #1e4663;
+            line-height: 1.2;
+        }
+
+        /* Text Display */
+        .text-display-wrapper {
+            background: #fef9e8;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #ffe0b5;
+            max-height: 250px;
+            overflow-y: auto;
+            min-height: 180px;
+        }
+
+        #text-display {
+            font-size: 1.4rem;
+            line-height: 2.2rem;
+            word-break: break-word;
+        }
+
+        .word {
+            display: inline-block;
+            margin: 0 4px 6px 0;
+            padding: 4px 10px;
+            border-radius: 25px;
+            transition: all 0.1s ease;
+        }
+
+        .word.correct {
+            background: #c8e6d9;
+            color: #1e5a3a;
+        }
+
+        .word.incorrect {
+            background: #ffe0e0;
+            color: #b00020;
+            text-decoration: line-through;
+        }
+
+        .word.active {
+            background: #ffecb3;
+            border-bottom: 3px solid #ff9800;
+            transform: scale(1.02);
+        }
+
+        .sentence-char {
+            display: inline;
+            font-size: 1.4rem;
+            transition: all 0.05s ease;
+        }
+
+        .sentence-char.correct-char {
+            background-color: #c8e6d9;
+            color: #1e5a3a;
+        }
+
+        .sentence-char.incorrect-char {
+            background-color: #ffe0e0;
+            color: #b00020;
+        }
+
+        .sentence-char.active-char {
+            background-color: #ffecb3;
+            border-bottom: 2px solid #ff9800;
+        }
+
+        .random-info {
+            background: #e8f0fe;
+            border-radius: 12px;
+            padding: 8px 15px;
+            margin-bottom: 15px;
+            font-size: 0.75rem;
+            color: #2c5f8a;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .random-badge {
+            background: #ff9800;
+            color: #2c2c2c;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* Input */
+        #input-field {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 1.3rem;
+            font-family: 'Khmer OS Battambang', monospace;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        #input-field:focus {
+            border-color: #ff9800;
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.2);
+        }
+
+        #input-field:disabled {
+            background: #f5f5f5;
+            color: #aaa;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 50px;
+            background: #ff9800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #e68900;
+            transform: translateY(-1px);
+        }
+
+        #start-btn {
+            background: #2c5f8a;
+            color: white;
+        }
+
+        .status-message {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .instruction {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #5f7f9e;
+            background: #f0f4f8;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        kbd {
+            background: #2c2c2c;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            margin: 0 2px;
+        }
+
+        .instruction-wrapper {
+            text-align: center;
+        }
+
+        /* RESULTS MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .results-modal {
+            background: white;
+            border-radius: 32px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .results-modal {
+            transform: scale(1);
+        }
+
+        .results-modal h2 {
+            color: #1e4663;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #ff9800;
+            display: inline-block;
+            padding-bottom: 8px;
+        }
+
+        .results-stats {
+            margin: 25px 0;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1rem;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #5a6e7c;
+        }
+
+        .result-value {
+            font-weight: 800;
+            color: #1e4663;
+        }
+
+        .result-value.highlight {
+            color: #ff9800;
+            font-size: 1.3rem;
+        }
+
+        .rating {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .rating-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .rating.gold { background: linear-gradient(135deg, #ffd700, #ffb347); color: #2c2c2c; }
+        .rating.silver { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #2c2c2c; }
+        .rating.bronze { background: linear-gradient(135deg, #cd7f32, #b87333); color: white; }
+        .rating.good { background: #c8e6d9; color: #1e5a3a; }
+        .rating.average { background: #ffecb3; color: #b26a00; }
+        .rating.bad { background: #ffe0e0; color: #b00020; }
+
+        .modal-close-btn {
+            background: #ff9800;
+            color: #2c2c2c;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            background: #e68900;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 700px) {
+            .container {
+                padding: 15px;
+            }
+            .word, .sentence-char {
+                font-size: 1.1rem;
+            }
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            .mode-btn, .duration-btn {
+                padding: 6px 16px;
+                font-size: 0.85rem;
+            }
+            .results-modal {
+                padding: 20px;
+            }
+            .result-item {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⌨️ ហ្វឹកហាត់វាយអក្សរខ្មែរ</h1>
+    <div class="subtitle">ជ្រើសរើសរបៀប និងរយៈពេល | Select Mode & Duration</div>
+
+    <!-- Mode Selection -->
+    <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="word">📝 របៀបពាក្យ | Word Mode</button>
+        <button class="mode-btn" data-mode="sentence">📄 របៀបប្រយោគ | Sentence Mode</button>
+    </div>
+
+    <!-- Duration Selection -->
+    <div class="duration-selector">
+        <button class="duration-btn" data-duration="15">15 វិនាទី | s</button>
+        <button class="duration-btn" data-duration="30">30 វិនាទី | s</button>
+        <button class="duration-btn active" data-duration="60">1 នាទី | min</button>
+        <button class="duration-btn" data-duration="180">3 នាទី | min</button>
+        <button class="duration-btn" data-duration="300">5 នាទី | min</button>
+    </div>
+
+    <!-- Random Info Display -->
+    <div class="random-info" id="random-info">
+        <span>🎲 ចៃដន្យ | Random</span>
+        <span id="random-stats" class="random-badge">ផ្ទុក...</span>
+    </div>
+
+    <!-- Stats Panel -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">⏱️ ពេលវេលា</div>
+            <div class="stat-value"><span id="time">60</span> <span id="time-unit">វិ</span></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">⚡ WPM</div>
+            <div class="stat-value"><span id="wpm">0</span></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">🎯 ភាពត្រឹមត្រូវ</div>
+            <div class="stat-value"><span id="accuracy">100</span>%</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">📊 វឌ្ឍនភាព</div>
+            <div class="stat-value"><span id="progress">0</span>%</div>
+        </div>
+    </div>
+
+    <!-- Text Display Area -->
+    <div class="text-display-wrapper">
+        <div id="text-display"></div>
+    </div>
+
+    <!-- Input Area -->
+    <input type="text" id="input-field" placeholder="វាយនៅទីនេះ រួចចុច Shift + Space... | Type here then press Shift + Space..." autocomplete="off" disabled>
+
+    <div class="btn-group">
+        <button id="start-btn">🚀 ចាប់ផ្តើម | Start</button>
+    </div>
+    <div id="status-message" class="status-message"></div>
+    <div class="instruction-wrapper">
+        <div class="instruction">
+            💡 ចុច <kbd>Shift</kbd> + <kbd>Space</kbd> ដើម្បីផ្ញើពាក្យ/តួអក្សរ | Press <kbd>Shift</kbd> + <kbd>Space</kbd> to submit
+        </div>
+    </div>
+</div>
+
+<!-- RESULTS MODAL -->
+<div id="results-modal" class="modal-overlay">
+    <div class="results-modal">
+        <h2>📊 លទ្ធផល | Results</h2>
+        <div class="results-stats" id="results-stats">
+            <!-- Dynamic content -->
+        </div>
+        <button class="modal-close-btn" onclick="closeResultsModal()">បិទ | Close</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     EXTERNAL JS FILES - YOUR KHMER CONTENT
+     ============================================================ -->
+<script src="khmer_words.js"></script>
+<script src="khmer_sentences.js"></script>
+
+<script>
+    // ============================================================
+    // APPLICATION CODE
+    // ============================================================
+    
+    // DOM Elements
+    const timeDisplay = document.getElementById("time");
+    const timeUnitSpan = document.getElementById("time-unit");
+    const wpmDisplay = document.getElementById("wpm");
+    const accuracyDisplay = document.getElementById("accuracy");
+    const progressDisplay = document.getElementById("progress");
+    const textDisplayDiv = document.getElementById("text-display");
+    const inputField = document.getElementById("input-field");
+    const startBtn = document.getElementById("start-btn");
+    const statusMsgDiv = document.getElementById("status-message");
+    const randomStatsSpan = document.getElementById("random-stats");
+    const modeBtns = document.querySelectorAll(".mode-btn");
+    const durationBtns = document.querySelectorAll(".duration-btn");
+    const modalOverlay = document.getElementById("results-modal");
+
+    // Check if external data loaded successfully
+    if (typeof FULL_KHMER_WORDS === 'undefined') {
+        console.error("khmer_words.js not loaded! Please make sure the file exists.");
+        statusMsgDiv.innerHTML = "❌ ERROR: khmer_words.js not found! Please check file path.";
+    }
+    
+    if (typeof FULL_KHMER_SENTENCES === 'undefined') {
+        console.error("khmer_sentences.js not loaded! Please make sure the file exists.");
+        statusMsgDiv.innerHTML = "❌ ERROR: khmer_sentences.js not found! Please check file path.";
+    }
+
+    // Game State
+    let currentMode = "word";
+    let currentDuration = 60;
+    let timeLeft = 60;
+    let timerInterval = null;
+    let isActive = false;
+    let correctCount = 0;
+    let totalAttempted = 0;
+    
+    // Word Mode Data
+    let wordsList = [];
+    let currentWordIndex = 0;
+    let wordStatuses = [];
+    
+    // Sentence Mode Data
+    let sentenceChars = [];
+    let currentCharIndex = 0;
+    let charStatuses = [];
+    
+    // ============================================================
+    // RANDOM SELECTION FUNCTIONS
+    // ============================================================
+    
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+    
+    function getRandomSubset(arr, count) {
+        const shuffled = shuffleArray([...arr]);
+        return shuffled.slice(0, Math.min(count, shuffled.length));
+    }
+    
+    function updateRandomInfo() {
+        if (currentMode === "word") {
+            randomStatsSpan.innerHTML = `🎲 ${wordsList.length} ពាក្យចៃដន្យ | ${wordsList.length} random words`;
+        } else {
+            let charCount = sentenceChars.length;
+            randomStatsSpan.innerHTML = `🎲 ${charCount} តួអក្សរចៃដន្យ | ${charCount} random characters`;
+        }
+    }
+    
+    function initContent() {
+        if (currentMode === "word") {
+            const wordsPerTest = typeof WORDS_PER_TEST !== 'undefined' ? WORDS_PER_TEST : 50;
+            wordsList = getRandomSubset(FULL_KHMER_WORDS, wordsPerTest);
+            wordStatuses = new Array(wordsList.length).fill("pending");
+            currentWordIndex = 0;
+        } else {
+            const sentencesPerTest = typeof SENTENCES_PER_TEST !== 'undefined' ? SENTENCES_PER_TEST : 5;
+            const randomSentences = getRandomSubset(FULL_KHMER_SENTENCES, sentencesPerTest);
+            let fullText = randomSentences.join(" ");
+            sentenceChars = fullText.split("");
+            charStatuses = new Array(sentenceChars.length).fill("pending");
+            currentCharIndex = 0;
+        }
+        updateRandomInfo();
+    }
+    
+    function formatTimeUnit(seconds) {
+        if (seconds < 60) {
+            timeUnitSpan.innerText = "វិ";
+            return seconds;
+        } else {
+            let minutes = Math.floor(seconds / 60);
+            timeUnitSpan.innerText = "នាទី";
+            return minutes;
+        }
+    }
+    
+    function updateTimerDisplay() {
+        let displayTime = formatTimeUnit(timeLeft);
+        timeDisplay.innerText = displayTime;
+    }
+    
+    // Stop test completely
+    function stopTest() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        isActive = false;
+        inputField.disabled = true;
+        inputField.value = "";
+    }
+    
+    // Reset UI without starting test
+    function resetUI() {
+        wpmDisplay.innerText = "0";
+        accuracyDisplay.innerText = "100";
+        progressDisplay.innerText = "0";
+        correctCount = 0;
+        totalAttempted = 0;
+        
+        if (currentMode === "word") {
+            wordStatuses = new Array(wordsList.length).fill("pending");
+            currentWordIndex = 0;
+        } else {
+            charStatuses = new Array(sentenceChars.length).fill("pending");
+            currentCharIndex = 0;
+        }
+        
+        render();
+    }
+    
+    // ============================================================
+    // RESULTS MODAL
+    // ============================================================
+    
+    function showResultsModal() {
+        const resultsDiv = document.getElementById("results-stats");
+        
+        let accuracy = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 0;
+        let wpm = 0;
+        let minutesElapsed = currentDuration / 60;
+        
+        if (currentMode === "word") {
+            wpm = minutesElapsed > 0 ? Math.round(correctCount / minutesElapsed) : 0;
+        } else {
+            wpm = minutesElapsed > 0 ? Math.round((correctCount / 5) / minutesElapsed) : 0;
+        }
+        
+        let completionPercent = 0;
+        if (currentMode === "word") {
+            completionPercent = wordsList.length ? Math.round((correctCount / wordsList.length) * 100) : 0;
+        } else {
+            completionPercent = sentenceChars.length ? Math.round((correctCount / sentenceChars.length) * 100) : 0;
+        }
+        
+        let rating = "";
+        let ratingClass = "";
+        
+        if (wpm >= 60 && accuracy >= 90) {
+            rating = "🏆 ពូកែណាស់! | Excellent!";
+            ratingClass = "gold";
+        } else if (wpm >= 40 && accuracy >= 80) {
+            rating = "🎖️ ល្អណាស់! | Very Good!";
+            ratingClass = "silver";
+        } else if (wpm >= 25 && accuracy >= 70) {
+            rating = "👍 ល្អ! | Good!";
+            ratingClass = "good";
+        } else if (wpm >= 15 && accuracy >= 60) {
+            rating = "📈 មធ្យម | Average";
+            ratingClass = "average";
+        } else {
+            rating = "💪 បន្តអនុវត្ត! | Keep Practicing!";
+            ratingClass = "bad";
+        }
+        
+        resultsDiv.innerHTML = `
+            <div class="result-item">
+                <span class="result-label">⚡ WPM (ពាក្យក្នុងមួយនាទី)</span>
+                <span class="result-value highlight">${wpm}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">🎯 ភាពត្រឹមត្រូវ | Accuracy</span>
+                <span class="result-value">${accuracy}%</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">✅ ត្រឹមត្រូវ | Correct</span>
+                <span class="result-value">${correctCount}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">❌ ខុស | Incorrect</span>
+                <span class="result-value">${totalAttempted - correctCount}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">📝 សរុបព្យាយាម | Total Attempts</span>
+                <span class="result-value">${totalAttempted}</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">📊 វឌ្ឍនភាព | Completion</span>
+                <span class="result-value">${completionPercent}%</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">⏱️ រយៈពេលសរុប | Total Time</span>
+                <span class="result-value">${currentDuration} ${currentDuration < 60 ? "វិនាទី | seconds" : Math.floor(currentDuration/60) + " នាទី | minutes"}</span>
+            </div>
+            <div class="rating ${ratingClass}">
+                <div class="rating-text">${rating}</div>
+            </div>
+        `;
+        
+        modalOverlay.classList.add("active");
+    }
+    
+    function closeResultsModal() {
+        modalOverlay.classList.remove("active");
+    }
+    
+    modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) {
+            closeResultsModal();
+        }
+    });
+    
+    // ============================================================
+    // GAME FUNCTIONS
+    // ============================================================
+    
+    function render() {
+        if (currentMode === "word") {
+            renderWordMode();
+        } else {
+            renderSentenceMode();
+        }
+        updateProgress();
+    }
+    
+    function renderWordMode() {
+        if (!wordsList.length) {
+            textDisplayDiv.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">⚠️ គ្មានពាក្យសម្រាប់វាយ | No words available</div>';
+            return;
+        }
+        
+        let html = '';
+        for (let i = 0; i < wordsList.length; i++) {
+            let wordClass = 'word';
+            if (i < currentWordIndex) {
+                wordClass += wordStatuses[i] === 'correct' ? ' correct' : ' incorrect';
+            } else if (i === currentWordIndex && isActive) {
+                wordClass += ' active';
+            }
+            html += `<span class="${wordClass}">${wordsList[i]}</span>`;
+        }
+        textDisplayDiv.innerHTML = html;
+    }
+    
+    function renderSentenceMode() {
+        if (!sentenceChars.length) {
+            textDisplayDiv.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">⚠️ គ្មានអក្សរសម្រាប់វាយ | No content available</div>';
+            return;
+        }
+        
+        let html = '<div>';
+        for (let i = 0; i < sentenceChars.length; i++) {
+            let char = sentenceChars[i];
+            let charClass = 'sentence-char';
+            
+            if (i < currentCharIndex) {
+                charClass += charStatuses[i] === 'correct' ? ' correct-char' : ' incorrect-char';
+            } else if (i === currentCharIndex && isActive) {
+                charClass += ' active-char';
+            }
+            
+            if (char === ' ') {
+                html += `<span class="${charClass}" style="white-space: pre;">&nbsp;</span>`;
+            } else if (char === '\n') {
+                html += `<br>`;
+            } else {
+                html += `<span class="${charClass}">${char}</span>`;
+            }
+        }
+        html += '</div>';
+        textDisplayDiv.innerHTML = html;
+    }
+    
+    function updateProgress() {
+        if (currentMode === "word") {
+            let completed = 0;
+            for (let i = 0; i < wordStatuses.length; i++) {
+                if (wordStatuses[i] !== "pending") completed++;
+            }
+            let percent = wordsList.length ? Math.round((completed / wordsList.length) * 100) : 0;
+            progressDisplay.innerText = percent;
+        } else {
+            let completed = 0;
+            for (let i = 0; i < charStatuses.length; i++) {
+                if (charStatuses[i] !== "pending") completed++;
+            }
+            let percent = sentenceChars.length ? Math.round((completed / sentenceChars.length) * 100) : 0;
+            progressDisplay.innerText = percent;
+        }
+    }
+    
+    function updateStats() {
+        let minutesElapsed = (currentDuration - timeLeft) / 60;
+        let wpm = 0;
+        
+        if (currentMode === "word") {
+            if (minutesElapsed > 0 && correctCount > 0) {
+                wpm = Math.round(correctCount / minutesElapsed);
+            }
+            let accuracy = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 100;
+            accuracyDisplay.innerText = accuracy;
+        } else {
+            if (minutesElapsed > 0 && correctCount > 0) {
+                wpm = Math.round((correctCount / 5) / minutesElapsed);
+            }
+            let accuracy = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : 100;
+            accuracyDisplay.innerText = accuracy;
+        }
+        
+        wpmDisplay.innerText = wpm;
+    }
+    
+    function endTest() {
+        stopTest();
+        statusMsgDiv.innerHTML = "✅ បញ្ចប់ការធ្វើតេស្ត! ចុច Start ដើម្បីចាប់ផ្តើមថ្មី។";
+        render();
+        showResultsModal();
+    }
+    
+    function startTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (!isActive) return;
+            if (timeLeft <= 1) {
+                timeLeft = 0;
+                updateTimerDisplay();
+                endTest();
+            } else {
+                timeLeft--;
+                updateTimerDisplay();
+                updateStats();
+            }
+        }, 1000);
+    }
+    
+    function handleWordSubmit(userInput) {
+        if (currentWordIndex >= wordsList.length) return;
+        
+        const currentWord = wordsList[currentWordIndex];
+        const trimmedInput = userInput.trim();
+        
+        if (trimmedInput === "") return;
+        
+        if (trimmedInput === currentWord) {
+            if (wordStatuses[currentWordIndex] !== "correct") {
+                wordStatuses[currentWordIndex] = "correct";
+                correctCount++;
+                totalAttempted++;
+                updateStats();
+            }
+        } else {
+            if (wordStatuses[currentWordIndex] !== "incorrect") {
+                wordStatuses[currentWordIndex] = "incorrect";
+                totalAttempted++;
+                updateStats();
+            }
+        }
+        
+        if (currentWordIndex + 1 < wordsList.length) {
+            currentWordIndex++;
+            inputField.value = "";
+            render();
+        } else {
+            if (isActive) endTest();
+        }
+    }
+    
+    function handleSentenceSubmit(userInput) {
+        if (currentCharIndex >= sentenceChars.length) return;
+        
+        const expectedChar = sentenceChars[currentCharIndex];
+        const typedChar = userInput.trim();
+        
+        if (typedChar === "") return;
+        
+        const firstChar = typedChar.charAt(0);
+        
+        if (firstChar === expectedChar) {
+            if (charStatuses[currentCharIndex] !== "correct") {
+                charStatuses[currentCharIndex] = "correct";
+                correctCount++;
+                totalAttempted++;
+                updateStats();
+            }
+            currentCharIndex++;
+            inputField.value = "";
+            render();
+            
+            if (currentCharIndex >= sentenceChars.length) {
+                if (isActive) endTest();
+            }
+        } else {
+            if (charStatuses[currentCharIndex] !== "incorrect") {
+                charStatuses[currentCharIndex] = "incorrect";
+                totalAttempted++;
+                updateStats();
+                render();
+            }
+            inputField.value = "";
+        }
+    }
+    
+    function onKeyDown(event) {
+        if (!isActive) return;
+        
+        if (event.shiftKey && event.key === ' ') {
+            event.preventDefault();
+            const userInput = inputField.value;
+            
+            if (currentMode === "word") {
+                handleWordSubmit(userInput);
+            } else {
+                handleSentenceSubmit(userInput);
+            }
+        }
+    }
+    
+    function startTest() {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+        
+        timeLeft = currentDuration;
+        isActive = true;
+        correctCount = 0;
+        totalAttempted = 0;
+        
+        if (currentMode === "word") {
+            wordStatuses = new Array(wordsList.length).fill("pending");
+            currentWordIndex = 0;
+        } else {
+            charStatuses = new Array(sentenceChars.length).fill("pending");
+            currentCharIndex = 0;
+        }
+        
+        updateTimerDisplay();
+        wpmDisplay.innerText = "0";
+        accuracyDisplay.innerText = "100";
+        inputField.disabled = false;
+        inputField.value = "";
+        inputField.focus();
+        
+        statusMsgDiv.innerHTML = `⌨️ កំពុងធ្វើតេស្ត! វាយរួចចុច Shift + Space | Test in progress! Type then press Shift + Space`;
+        
+        render();
+        startTimer();
+        updateStats();
+    }
+    
+    // ============================================================
+    // HANDLE MODE & DURATION CHANGES
+    // ============================================================
+    
+    function refreshContentAndStop() {
+        // Stop any ongoing test
+        stopTest();
+        
+        // Generate new random content
+        initContent();
+        
+        // Reset UI
+        timeLeft = currentDuration;
+        updateTimerDisplay();
+        resetUI();
+        
+        // Update status message
+        let modeText = currentMode === "word" ? "ពាក្យ" : "ប្រយោគ";
+        statusMsgDiv.innerHTML = `🎲 បានបង្កើត ${modeText}ចៃដន្យថ្មី! ចុច Start ដើម្បីចាប់ផ្តើម | New random ${modeText} generated! Click Start to begin`;
+        
+        // Disable input until start
+        inputField.disabled = true;
+        inputField.value = "";
+    }
+    
+    function setDuration(seconds) {
+        if (currentDuration === seconds) return;
+        
+        currentDuration = seconds;
+        timeLeft = seconds;
+        
+        durationBtns.forEach(btn => {
+            if (parseInt(btn.dataset.duration) === seconds) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+        
+        // Refresh content and stop test
+        refreshContentAndStop();
+    }
+    
+    function setMode(mode) {
+        if (mode === currentMode) return;
+        
+        currentMode = mode;
+        
+        modeBtns.forEach(btn => {
+            if (btn.dataset.mode === mode) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+        
+        // Refresh content and stop test
+        refreshContentAndStop();
+    }
+    
+    // ============================================================
+    // EVENT LISTENERS
+    // ============================================================
+    
+    startBtn.addEventListener("click", startTest);
+    inputField.addEventListener("keydown", onKeyDown);
+    
+    modeBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            setMode(btn.dataset.mode);
+        });
+    });
+    
+    durationBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            setDuration(parseInt(btn.dataset.duration));
+        });
+    });
+    
+    // ============================================================
+    // INITIAL SETUP
+    // ============================================================
+    
+    initContent();
+    timeLeft = currentDuration;
+    updateTimerDisplay();
+    resetUI();
+    statusMsgDiv.innerHTML = "✅ ប្រព័ន្ធរួចរាល់! ចុច Start ដើម្បីចាប់ផ្តើម | System ready! Click Start to begin";
+    inputField.disabled = true;
+</script>
+</body>
+</html>
